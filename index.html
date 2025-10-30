@@ -933,6 +933,11 @@
                 updateDutyFreeDisplay();
             });
 
+            const quantityInput = bottleCard.querySelector('.quantity-input');
+            quantityInput.addEventListener('input', () => {
+                updateDutyFreeDisplay();
+            });
+
             const dutyFreeCheckbox = bottleCard.querySelector('.use-duty-free-checkbox');
             dutyFreeCheckbox.addEventListener('change', () => {
                 updateDutyFreeDisplay();
