@@ -1030,6 +1030,7 @@
                     // 處理免稅額
                     let dutyFreeVolume = 0;
                     let taxableVolume = volumeInLiters * bottle.quantity;
+                    let totalVolume = volumeInLiters * bottle.quantity;
 
                     if (bottle.useDutyFree && remainingDutyFree > 0) {
                         dutyFreeVolume = Math.min(taxableVolume, remainingDutyFree);
@@ -1037,11 +1038,24 @@
                         remainingDutyFree -= dutyFreeVolume;
                     }
 
+                    // 計算應稅比例和應稅購買成本
+                    const taxableRatio = totalVolume > 0 ? taxableVolume / totalVolume : 1;
+                    const taxablePurchaseCost = purchaseCost * taxableRatio;
+
                     // 計算酒稅（只對超過免稅額的部分課稅）
                     const alcoholTax = alcoholTaxPerLiter * taxableVolume;
-                    const tariff = purchaseCost * (bottle.tariffRate / 100);
-                    const tradeFee = purchaseCost * 0.0004;
-                    const subtotalForVAT = purchaseCost + alcoholTax + tariff + tradeFee;
+
+                    // 關稅只對應稅購買成本計算
+                    const tariff = taxablePurchaseCost * (bottle.tariffRate / 100);
+
+                    // 推廣費只對應稅購買成本計算，且 < 100 不收
+                    let tradeFee = taxablePurchaseCost * 0.0004;
+                    if (tradeFee < 100) {
+                        tradeFee = 0;
+                    }
+
+                    // 營業稅基礎改為應稅購買成本
+                    const subtotalForVAT = taxablePurchaseCost + alcoholTax + tariff + tradeFee;
                     const vat = subtotalForVAT * 0.05;
 
                     totalPurchaseCost += purchaseCost;
@@ -1112,12 +1126,15 @@
                 let detailsHTML = '<p><strong>稅金計算說明：</strong></p><ol>';
                 detailsHTML += '<li>購買成本 = 單價 × 匯率 × 數量</li>';
                 detailsHTML += '<li>免稅額 = 入境人數 × 1.5公升（勾選「使用免稅額」的酒品優先扣除）</li>';
-                detailsHTML += '<li>酒稅 = 每公升稅率 × 容量(公升) - 免稅額對應的酒稅</li>';
-                detailsHTML += '<li>關稅 = 購買成本 × 關稅率</li>';
-                detailsHTML += '<li>推廣貿易服務費 = 購買成本 × 0.04%</li>';
-                detailsHTML += '<li>營業稅 = (購買成本 + 酒稅 + 關稅 + 推廣費) × 5%</li>';
+                detailsHTML += '<li>應稅比例 = (總容量 - 免稅容量) / 總容量</li>';
+                detailsHTML += '<li>應稅購買成本 = 購買成本 × 應稅比例</li>';
+                detailsHTML += '<li>酒稅 = 每公升稅率 × 應稅容量（扣除免稅額後的容量）</li>';
+                detailsHTML += '<li>關稅 = 應稅購買成本 × 關稅率</li>';
+                detailsHTML += '<li>推廣貿易服務費 = 應稅購買成本 × 0.04%（低於100元則不收費）</li>';
+                detailsHTML += '<li>營業稅 = (應稅購買成本 + 酒稅 + 關稅 + 推廣費) × 5%</li>';
                 detailsHTML += '<li>總成本 = 購買成本 + 酒稅 + 關稅 + 推廣費 + 營業稅</li>';
                 detailsHTML += '</ol>';
+                detailsHTML += '<p style="margin-top: 15px; color: #666; font-size: 14px;">💡 <strong>免稅額計算說明：</strong>在免稅額內的部分，購買成本按比例計算為「免稅」和「應稅」兩部分，只對應稅部分課稅。</p>';
 
                 document.getElementById('calculationDetails').innerHTML = detailsHTML;
 
