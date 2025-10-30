@@ -523,13 +523,23 @@
             bar.setAttribute('data-percentage', percentageText);
 
             // 更新每個酒品的免稅額使用顯示
+            let remainingForDisplay = totalDutyFree;
             document.querySelectorAll('.bottle-card').forEach(card => {
                 const checkbox = card.querySelector('.use-duty-free-checkbox');
                 const usageSpan = card.querySelector('.duty-free-usage');
                 if (checkbox && checkbox.checked && usageSpan) {
                     const volume = parseFloat(card.querySelector('.volume-input').value) || 0;
                     const quantity = parseInt(card.querySelector('.quantity-input').value) || 1;
-                    usageSpan.textContent = `佔用 ${((volume * quantity) / 1000).toFixed(2)}L`;
+                    const totalVolume = (volume * quantity) / 1000;
+
+                    if (remainingForDisplay > 0) {
+                        const usedDutyFree = Math.min(totalVolume, remainingForDisplay);
+                        const taxableVolume = totalVolume - usedDutyFree;
+                        remainingForDisplay -= usedDutyFree;
+                        usageSpan.textContent = `共 ${totalVolume.toFixed(2)}L（免稅 ${usedDutyFree.toFixed(2)}L，應稅 ${taxableVolume.toFixed(2)}L）`;
+                    } else {
+                        usageSpan.textContent = `共 ${totalVolume.toFixed(2)}L（應稅 ${totalVolume.toFixed(2)}L）`;
+                    }
                 } else if (usageSpan) {
                     usageSpan.textContent = '';
                 }
@@ -1117,15 +1127,27 @@
                 `;
 
                 // 顯示詳細計算表格
-                let resultHTML = '<h3>酒品明細</h3><table class="result-table"><tr><th>酒品</th><th>購買成本</th><th>免稅額</th><th>酒稅</th><th>關稅</th><th>推廣費</th><th>營業稅</th><th>小計</th></tr>';
+                let resultHTML = '<h3>酒品明細</h3><table class="result-table"><tr><th>酒品</th><th>容量明細</th><th>購買成本</th><th>酒稅</th><th>關稅</th><th>推廣費</th><th>營業稅</th><th>小計</th></tr>';
 
                 bottleResults.forEach(bottle => {
                     const bottleTypeName = document.querySelector(`option[value="${bottle.alcoholType}"]`).textContent;
+                    const totalVol = bottle.volumeInLiters * bottle.quantity;
+                    const dutyFreeVol = bottle.dutyFreeVolume;
+                    const taxableVol = bottle.taxableVolume;
+
+                    let volumeDetail = `總 ${totalVol.toFixed(2)}L`;
+                    if (dutyFreeVol > 0) {
+                        volumeDetail += `<br><span style="color: #00A896; font-size: 12px;">免稅 ${dutyFreeVol.toFixed(2)}L</span>`;
+                        volumeDetail += `<br><span style="color: #E68A00; font-size: 12px;">應稅 ${taxableVol.toFixed(2)}L</span>`;
+                    } else {
+                        volumeDetail += `<br><span style="color: #E68A00; font-size: 12px;">應稅 ${taxableVol.toFixed(2)}L</span>`;
+                    }
+
                     resultHTML += `
                         <tr>
                             <td>${bottleTypeName} x${bottle.quantity}</td>
+                            <td>${volumeDetail}</td>
                             <td>${formatNumber(bottle.purchaseCost)}</td>
-                            <td>${bottle.dutyFreeVolume > 0 ? bottle.dutyFreeVolume.toFixed(2) + 'L' : '-'}</td>
                             <td>${formatNumber(bottle.alcoholTax)}</td>
                             <td>${formatNumber(bottle.tariff)}</td>
                             <td>${formatNumber(bottle.tradeFee)}</td>
@@ -1135,11 +1157,19 @@
                     `;
                 });
 
+                const totalUsedDutyFree = totalDutyFree - remainingDutyFree;
+                let totalVolumeSum = 0;
+                let totalTaxableSum = 0;
+                bottleResults.forEach(bottle => {
+                    totalVolumeSum += bottle.volumeInLiters * bottle.quantity;
+                    totalTaxableSum += bottle.taxableVolume;
+                });
+
                 resultHTML += `
-                    <tr style="background-color: rgba(74, 111, 165, 0.1); font-weight: bold;">
+                    <tr style="background-color: rgba(0, 108, 94, 0.1); font-weight: bold;">
                         <td>總計</td>
+                        <td>總 ${totalVolumeSum.toFixed(2)}L<br><span style="color: #00A896; font-size: 12px;">免稅 ${totalUsedDutyFree.toFixed(2)}L</span><br><span style="color: #E68A00; font-size: 12px;">應稅 ${totalTaxableSum.toFixed(2)}L</span></td>
                         <td>${formatNumber(totalPurchaseCost)}</td>
-                        <td>${(totalDutyFree - remainingDutyFree).toFixed(2)}L</td>
                         <td>${formatNumber(totalAlcoholTax)}</td>
                         <td>${formatNumber(totalTariff)}</td>
                         <td>${formatNumber(totalTradeFee)}</td>
