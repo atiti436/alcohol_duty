@@ -169,13 +169,21 @@
             background: linear-gradient(90deg, #00A896 0%, #028174 100%);
             height: 100%;
             transition: width 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: relative;
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2);
+        }
+
+        .duty-free-bar::after {
+            content: attr(data-percentage);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             color: white;
             font-weight: bold;
             font-size: 13px;
-            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+            z-index: 1;
         }
 
         .duty-free-text {
@@ -506,9 +514,12 @@
             document.getElementById('usedDutyFree').textContent = usedDutyFree.toFixed(2);
             document.getElementById('remainingDutyFree').textContent = remainingDutyFree.toFixed(2);
 
+            const bar = document.querySelector('.duty-free-bar');
             const barFill = document.getElementById('dutyFreeBar');
-            barFill.style.width = percentage.toFixed(1) + '%';
-            barFill.textContent = percentage.toFixed(1) + '%';
+            const percentageText = percentage.toFixed(1) + '%';
+
+            barFill.style.width = percentageText;
+            bar.setAttribute('data-percentage', percentageText);
 
             // 更新每個酒品的免稅額使用顯示
             document.querySelectorAll('.bottle-card').forEach(card => {
