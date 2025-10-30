@@ -1,0 +1,1015 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酒類進口稅金計算機</title>
+    <style>
+        :root {
+            --text-color: #333;
+            --bg-color: #f5f5f5;
+            --card-bg: #fff;
+            --border-color: #ddd;
+            --primary-color: #4a6fa5;
+            --accent-color: #28a745;
+            --error-color: #dc3545;
+            --info-color: #17a2b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+
+        .col {
+            flex: 1;
+            padding: 0 10px;
+            min-width: 200px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .result {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .result-table th, .result-table td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        .tax-info {
+            background-color: rgba(74, 111, 165, 0.1);
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .highlight {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .calculation-details {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #6c757d;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .savings {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .current-tariff {
+            font-size: 14px;
+            color: var(--primary-color);
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        /* 零售/批發價格計算相關樣式 */
+        .pricing-card {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+
+        .pricing-options {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .pricing-option {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .pricing-option input[type="radio"] {
+            width: auto;
+            margin-right: 5px;
+        }
+
+        .pricing-option label {
+            margin-bottom: 0;
+            display: inline;
+            font-weight: normal;
+        }
+
+        .tab-content > div {
+            display: none;
+        }
+
+        .tab-content > div.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .col {
+                flex: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>酒類進口稅金計算機</h1>
+            <p>計算酒類進口的酒稅、關稅、推廣貿易服務費及營業稅</p>
+        </header>
+
+        <div class="card">
+            <form id="taxCalculatorForm">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="alcoholType">酒類種類</label>
+                            <select id="alcoholType">
+                                <option value="whisky">威士忌</option>
+                                <option value="wine">葡萄酒</option>
+                                <option value="beer">啤酒</option>
+                                <option value="sake">清酒</option>
+                                <option value="vodka">伏特加</option>
+                                <option value="rum">蘭姆酒</option>
+                                <option value="gin">琴酒</option>
+                                <option value="liqueur">利口酒</option>
+                                <option value="brandy">白蘭地</option>
+                                <option value="other">其他</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="alcoholCategory">酒類分類（稅率計算用）</label>
+                            <select id="alcoholCategory">
+                                <option value="fermented-beer">釀造酒類 - 啤酒</option>
+                                <option value="fermented-other">釀造酒類 - 其他釀造酒</option>
+                                <option value="distilled">蒸餾酒類</option>
+                                <option value="remanufactured-high">再製酒類 - 酒精成分超過20%</option>
+                                <option value="remanufactured-low">再製酒類 - 酒精成分20%以下</option>
+                                <option value="cooking">料理酒</option>
+                                <option value="other">其他酒類</option>
+                                <option value="alcohol">酒精</option>
+                            </select>
+                            <div id="taxRateInfo" class="tax-info"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="alcoholPercentage">酒精度數 (%)</label>
+                            <input type="number" id="alcoholPercentage" min="0" max="100" step="0.1" value="40">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="volume">容量 (ml)</label>
+                            <input type="number" id="volume" min="0" step="1" value="700">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tariffRate">關稅率 (%)</label>
+                            <input type="number" id="tariffRate" min="0" max="100" step="0.1" value="0">
+                            <div id="currentTariff" class="current-tariff">威士忌標準關稅率: 0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="currency">外幣</label>
+                            <select id="currency">
+                                <option value="JPY">日幣 (JPY)</option>
+                                <option value="USD">美元 (USD)</option>
+                                <option value="EUR">歐元 (EUR)</option>
+                                <option value="GBP">英鎊 (GBP)</option>
+                                <option value="CNY">人民幣 (CNY)</option>
+                                <option value="TWD">新台幣 (TWD)</option>
+                                <option value="OTHER">其他貨幣</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="exchangeRate">匯率 (兌換新台幣)</label>
+                            <input type="number" id="exchangeRate" min="0" step="0.0001" value="0.22">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="price">購買單價 (外幣/瓶)</label>
+                            <input type="number" id="price" min="0" step="0.01" placeholder="例：5000">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="shippingCost">運費 (TWD)</label>
+                            <input type="number" id="shippingCost" min="0" step="1" placeholder="例：500" value="0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="quantity">數量 (瓶)</label>
+                            <input type="number" id="quantity" min="1" step="1" value="1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <input type="checkbox" id="radiationZone" style="width: auto; margin-right: 8px;">
+                            <label for="radiationZone" style="display: inline;">輻射區進口</label>
+                            <div id="radiationOptions" class="hide" style="margin-top: 8px; margin-left: 24px;">
+                                <label for="inspectionQuantity">抽檢消滅數量 (瓶)</label>
+                                <input type="number" id="inspectionQuantity" min="1" step="1" value="2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="button" id="calculateBtn">計算稅金</button>
+            </form>
+        </div>
+
+        <div id="resultSection" class="card hide">
+            <h2>計算結果</h2>
+            
+            <div class="highlight">
+                <h3>進口總成本</h3>
+                <p>購買成本 + 運費 + 稅金</p>
+                <div id="totalCost" class="savings"></div>
+                <div id="radiationAdjustedCost" class="hide">
+                    <hr style="margin: 10px 0;">
+                    <p><strong>輻射區調整後結果</strong></p>
+                    <p>抽檢消滅: <span id="inspectionQuantityDisplay"></span> 瓶，可銷售數量: <span id="remainingQuantityDisplay"></span> 瓶</p>
+                    <p>調整後單瓶成本: <span id="adjustedCostPerBottle" class="savings"></span></p>
+                </div>
+            </div>
+            
+            <div id="taxResult"></div>
+            
+            <div class="calculation-details">
+                <h3 onclick="toggleCalculationDetails()" style="cursor: pointer;">
+                    稅金計算說明 <span id="detailsToggle">[展開]</span>
+                </h3>
+                <div id="calculationDetails" class="hide"></div>
+            </div>
+
+            <div class="pricing-card">
+                <h3>零售/批發價格計算</h3>
+                
+                <div class="pricing-options">
+                    <div class="pricing-option">
+                        <input type="radio" id="calcProfit" name="pricingOption" value="calcProfit" checked>
+                        <label for="calcProfit">輸入售價，計算毛利率</label>
+                    </div>
+                    <div class="pricing-option">
+                        <input type="radio" id="calcPrice" name="pricingOption" value="calcPrice">
+                        <label for="calcPrice">輸入毛利率，計算售價</label>
+                    </div>
+                </div>
+                
+                <div class="tab-content">
+                    <div id="calcProfitTab" class="active">
+                        <div class="form-group">
+                            <label for="sellingPrice">售價 (TWD/瓶)</label>
+                            <input type="number" id="sellingPrice" min="0" step="1">
+                        </div>
+                        <button type="button" id="calculateProfitBtn">計算毛利率</button>
+                        <div id="profitResult" class="result hide"></div>
+                    </div>
+                    
+                    <div id="calcPriceTab" class="hide">
+                        <div class="form-group">
+                            <label for="targetProfit">目標毛利率 (%)</label>
+                            <input type="number" id="targetProfit" min="0" max="100" step="1" value="20">
+                        </div>
+                        <button type="button" id="calculatePriceBtn">計算建議售價</button>
+                        <div id="priceResult" class="result hide"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // 格式化數字 (不顯示小數點)
+function formatNumber(num) {
+    if (num === undefined || num === null) {
+        return "0";
+    }
+    // 四捨五入到整數
+    const roundedNum = Math.round(num);
+    return roundedNum.toLocaleString('zh-TW');
+}
+
+    // 切換輻射區選項
+    function toggleRadiationOptions() {
+        const isChecked = document.getElementById('radiationZone').checked;
+        document.getElementById('radiationOptions').classList.toggle('hide', !isChecked);
+    }
+
+    // 切換計算詳情
+    function toggleCalculationDetails() {
+        const details = document.getElementById('calculationDetails');
+        const toggle = document.getElementById('detailsToggle');
+        const isHidden = details.classList.contains('hide');
+        
+        details.classList.toggle('hide', !isHidden);
+        toggle.textContent = isHidden ? '[收合]' : '[展開]';
+    }
+
+    // 更新稅率信息
+    function updateTaxRateInfo() {
+        const category = document.getElementById('alcoholCategory').value;
+        const alcoholPercentage = parseFloat(document.getElementById('alcoholPercentage').value) || 0;
+        const taxRateInfoDiv = document.getElementById('taxRateInfo');
+        
+        // 根據酒類分類獲取稅率信息
+        let taxRateText = '';
+        switch(category) {
+            case 'fermented-beer':
+                taxRateText = '酒稅計算：每公升 26 元';
+                break;
+            case 'fermented-other':
+                taxRateText = `酒稅計算：每公升 按酒精成分每度 7 元 (${alcoholPercentage}度 × 7元 = ${(alcoholPercentage * 7).toFixed(2)}元/公升)`;
+                break;
+            case 'distilled':
+                taxRateText = `酒稅計算：每公升 按酒精成分每度 2.5 元 (${alcoholPercentage}度 × 2.5元 = ${(alcoholPercentage * 2.5).toFixed(2)}元/公升)`;
+                break;
+            case 'remanufactured-high':
+                taxRateText = '酒稅計算：每公升 185 元 (適用於酒精成分超過20%的再製酒)';
+                break;
+            case 'remanufactured-low':
+                taxRateText = `酒稅計算：每公升 按酒精成分每度 7 元 (${alcoholPercentage}度 × 7元 = ${(alcoholPercentage * 7).toFixed(2)}元/公升) (適用於酒精成分20%以下的再製酒)`;
+                break;
+            case 'cooking':
+                taxRateText = '酒稅計算：每公升 9 元';
+                break;
+            case 'other':
+                taxRateText = `酒稅計算：每公升 按酒精成分每度 7 元 (${alcoholPercentage}度 × 7元 = ${(alcoholPercentage * 7).toFixed(2)}元/公升)`;
+                break;
+            case 'alcohol':
+                taxRateText = '酒稅計算：每公升 15 元';
+                break;
+        }
+        
+        taxRateInfoDiv.textContent = taxRateText;
+    }
+
+    // 更新利口酒關稅率
+    function updateLiqueurTariff() {
+        const alcoholPercentage = parseFloat(document.getElementById('alcoholPercentage').value) || 0;
+        const isDistilledBase = document.getElementById('isDistilledBase').value === 'distilled';
+        const tariffRateInput = document.getElementById('tariffRate');
+        const currentTariffDiv = document.getElementById('currentTariff');
+        let tariffRate, tariffExplanation;
+        
+        // 計算利口酒關稅率
+        if (alcoholPercentage > 15 && isDistilledBase) {
+            tariffRate = 0;
+            tariffExplanation = '(>15%酒精且蒸餾酒基酒)';
+        } else if (alcoholPercentage > 20) {
+            tariffRate = 40;
+            tariffExplanation = '(>20%酒精但非蒸餾酒基酒)';
+        } else {
+            tariffRate = 20;
+            tariffExplanation = '(其他情況)';
+        }
+        
+        // 設置關稅率和說明
+        tariffRateInput.value = tariffRate;
+        currentTariffDiv.textContent = `利口酒當前關稅率: ${tariffRate}% ${tariffExplanation}`;
+        
+        // 更新酒類分類
+        const categorySelect = document.getElementById('alcoholCategory');
+        if (alcoholPercentage > 20) {
+            categorySelect.value = 'remanufactured-high';
+        } else {
+            categorySelect.value = 'remanufactured-low';
+        }
+        
+        // 更新稅率信息
+        updateTaxRateInfo();
+    }
+
+    // 更新貨幣預設匯率
+    function updateCurrencyDefaults() {
+        const currency = document.getElementById('currency').value;
+        const exchangeRateInput = document.getElementById('exchangeRate');
+        
+        switch(currency) {
+            case 'JPY':
+                exchangeRateInput.value = '0.22';
+                break;
+            case 'USD':
+                exchangeRateInput.value = '31.5';
+                break;
+            case 'EUR':
+                exchangeRateInput.value = '34.2';
+                break;
+            case 'GBP':
+                exchangeRateInput.value = '40.5';
+                break;
+            case 'CNY':
+                exchangeRateInput.value = '4.35';
+                break;
+            case 'TWD':
+                exchangeRateInput.value = '1';
+                break;
+            default:
+                exchangeRateInput.value = '';
+        }
+    }
+
+    // 更新酒類種類預設值
+    function updateAlcoholTypeDefaults() {
+        try {
+            const alcoholType = document.getElementById('alcoholType').value;
+            const categorySelect = document.getElementById('alcoholCategory');
+            const alcoholPercentageInput = document.getElementById('alcoholPercentage');
+            const volumeInput = document.getElementById('volume');
+            const tariffRateInput = document.getElementById('tariffRate');
+            const currentTariffDiv = document.getElementById('currentTariff');
+            
+            // 移除利口酒相關元素
+            const liqueurInfo = document.getElementById('liqueurInfo');
+            if (liqueurInfo) {
+                liqueurInfo.remove();
+            }
+            
+            // 根據酒類設置預設值
+            switch(alcoholType) {
+                case 'whisky':
+                    categorySelect.value = 'distilled';
+                    alcoholPercentageInput.value = '40';
+                    volumeInput.value = '700';
+                    tariffRateInput.value = '0';
+                    currentTariffDiv.textContent = '威士忌標準關稅率: 0%';
+                    break;
+                case 'wine':
+                    categorySelect.value = 'fermented-other';
+                    alcoholPercentageInput.value = '13';
+                    volumeInput.value = '750';
+                    tariffRateInput.value = '10';
+                    currentTariffDiv.textContent = '葡萄酒標準關稅率: 10%';
+                    break;
+                case 'beer':
+                    categorySelect.value = 'fermented-beer';
+                    alcoholPercentageInput.value = '5';
+                    volumeInput.value = '330';
+                    tariffRateInput.value = '0';
+                    currentTariffDiv.textContent = '啤酒標準關稅率: 0%';
+                    break;
+                case 'sake':
+                    categorySelect.value = 'fermented-other';
+                    alcoholPercentageInput.value = '15';
+                    volumeInput.value = '720';
+                    tariffRateInput.value = '20';
+                    currentTariffDiv.textContent = '清酒標準關稅率: 20%';
+                    break;
+                case 'vodka':
+                    categorySelect.value = 'distilled';
+                    alcoholPercentageInput.value = '40';
+                    volumeInput.value = '700';
+                    tariffRateInput.value = '20';
+                    currentTariffDiv.textContent = '伏特加標準關稅率: 20%';
+                    break;
+                case 'rum':
+                    categorySelect.value = 'distilled';
+                    alcoholPercentageInput.value = '40';
+                    volumeInput.value = '700';
+                    tariffRateInput.value = '20';
+                    currentTariffDiv.textContent = '蘭姆酒標準關稅率: 20%';
+                    break;
+                case 'gin':
+                    categorySelect.value = 'distilled';
+                    alcoholPercentageInput.value = '40';
+                    volumeInput.value = '700';
+                    tariffRateInput.value = '20';
+                    currentTariffDiv.textContent = '琴酒標準關稅率: 20%';
+                    break;
+                case 'liqueur':
+                    const alcoholPercentage = parseFloat(alcoholPercentageInput.value) || 20;
+                    
+                    // 設置利口酒預設值
+                    alcoholPercentageInput.value = '20';
+                    volumeInput.value = '700';
+                    
+                    // 設置利口酒分類
+                    if (alcoholPercentage > 20) {
+                        categorySelect.value = 'remanufactured-high';
+                    } else {
+                        categorySelect.value = 'remanufactured-low';
+                    }
+                    
+                    // 添加利口酒基酒類型選擇
+                    const liqueurInfoDiv = document.createElement('div');
+                    liqueurInfoDiv.id = 'liqueurInfo';
+                    liqueurInfoDiv.className = 'tax-info';
+                    liqueurInfoDiv.innerHTML = `
+                        <div class="form-group" style="margin-top: 10px;">
+                            <label for="isDistilledBase">利口酒基酒類型</label>
+                            <select id="isDistilledBase">
+                                <option value="distilled">蒸餾酒/酒精為基酒</option>
+                                <option value="other">其他基酒</option>
+                            </select>
+                        </div>
+                        <div id="liqueurTariffInfo" style="margin-top: 5px;">
+                            <strong>利口酒關稅說明：</strong><br>
+                            - 酒精強度>15%且基酒為蒸餾酒/酒精：0%<br>
+                            - 酒精濃度>20%但不符合上述條件：40%<br>
+                            - 其他情況：20%
+                        </div>
+                    `;
+                    
+                    document.getElementById('tariffRate').parentNode.appendChild(liqueurInfoDiv);
+                    
+                    // 設置利口酒關稅率
+                    setTimeout(function() {
+                        const isDistilledBaseElement = document.getElementById('isDistilledBase');
+                        if (isDistilledBaseElement) {
+                            isDistilledBaseElement.addEventListener('change', updateLiqueurTariff);
+                            updateLiqueurTariff();
+                        }
+                    }, 50); // 給DOM更多時間完成更新
+                    break;
+                case 'brandy':
+                    categorySelect.value = 'distilled';
+                    alcoholPercentageInput.value = '40';
+                    volumeInput.value = '700';
+                    tariffRateInput.value = '0';
+                    currentTariffDiv.textContent = '白蘭地標準關稅率: 0%';
+                    break;
+                default:
+                    categorySelect.value = 'other';
+                    break;
+            }
+            
+            // 更新稅率信息
+            updateTaxRateInfo();
+        } catch (error) {
+            console.error('更新酒類預設值時發生錯誤:', error);
+        }
+    }
+
+    // 計算稅金
+    function calculateTax() {
+        try {
+            // 獲取輸入值
+            const alcoholCategory = document.getElementById('alcoholCategory').value;
+            const alcoholPercentage = parseFloat(document.getElementById('alcoholPercentage').value) || 0;
+            const volume = parseFloat(document.getElementById('volume').value) || 0;
+            const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 0;
+            const price = parseFloat(document.getElementById('price').value) || 0;
+            const shippingCost = parseFloat(document.getElementById('shippingCost').value) || 0;
+            const tariffRate = parseFloat(document.getElementById('tariffRate').value) || 0;
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            const currency = document.getElementById('currency').value;
+            const isRadiationZone = document.getElementById('radiationZone').checked;
+            const inspectionQuantity = isRadiationZone ? (parseInt(document.getElementById('inspectionQuantity').value) || 0) : 0;
+
+            // 驗證輸入
+            if (alcoholPercentage <= 0 || volume <= 0 || exchangeRate <= 0 || price <= 0) {
+                alert('請確保所有必填欄位都已填寫正確的數值（購買價格、酒精度數、容量和匯率是必須的）');
+                return;
+            }
+            
+            if (isRadiationZone && (inspectionQuantity <= 0 || inspectionQuantity >= quantity)) {
+                alert('請確保抽檢數量大於0且小於總數量');
+                return;
+            }
+
+            // 將 ml 轉換為 l
+            const volumeInLiters = volume / 1000;
+
+            // 計算酒稅
+            let alcoholTaxPerLiter = 0;
+            let alcoholTaxFormula = '';
+            
+            switch (alcoholCategory) {
+                case 'fermented-beer':
+                    alcoholTaxPerLiter = 26;
+                    alcoholTaxFormula = '每公升 26 元';
+                    break;
+                case 'fermented-other':
+                    alcoholTaxPerLiter = 7 * alcoholPercentage;
+                    alcoholTaxFormula = `${alcoholPercentage}度 × 7元/度/公升`;
+                    break;
+                case 'distilled':
+                    alcoholTaxPerLiter = 2.5 * alcoholPercentage;
+                    alcoholTaxFormula = `${alcoholPercentage}度 × 2.5元/度/公升`;
+                    break;
+                case 'remanufactured-high':
+                    alcoholTaxPerLiter = 185;
+                    alcoholTaxFormula = '每公升 185 元';
+                    break;
+                case 'remanufactured-low':
+                    alcoholTaxPerLiter = 7 * alcoholPercentage;
+                    alcoholTaxFormula = `${alcoholPercentage}度 × 7元/度/公升`;
+                    break;
+                case 'cooking':
+                    alcoholTaxPerLiter = 9;
+                    alcoholTaxFormula = '每公升 9 元';
+                    break;
+                case 'other':
+                    alcoholTaxPerLiter = 7 * alcoholPercentage;
+                    alcoholTaxFormula = `${alcoholPercentage}度 × 7元/度/公升`;
+                    break;
+                case 'alcohol':
+                    alcoholTaxPerLiter = 15;
+                    alcoholTaxFormula = '每公升 15 元';
+                    break;
+            }
+
+            // 計算各項稅金
+            const alcoholTaxPerBottle = alcoholTaxPerLiter * volumeInLiters;
+            const purchaseCost = price * exchangeRate * quantity;
+            const importPrice = purchaseCost;
+            const tariff = importPrice * (tariffRate / 100);
+            const alcoholTax = alcoholTaxPerBottle * quantity;
+            const tradeFee = importPrice * 0.0004; // 0.04%
+            const subtotalForVAT = importPrice + alcoholTax + tariff + tradeFee;
+            const vat = subtotalForVAT * 0.05; // 5% 營業稅
+            const totalTax = alcoholTax + tariff + tradeFee + vat;
+            const totalCost = purchaseCost + shippingCost + totalTax;
+            const costPerBottle = totalCost / quantity;
+            
+            // 保存計算結果到全局變量，供零售價格計算使用
+            window.calculatedCostPerBottle = costPerBottle;
+            
+            // 輻射區調整後成本
+            let adjustedCostPerBottle = costPerBottle;
+            let remainingQuantity = quantity;
+            
+            if (isRadiationZone && inspectionQuantity > 0) {
+                remainingQuantity = quantity - inspectionQuantity;
+                adjustedCostPerBottle = totalCost / remainingQuantity;
+                
+                // 顯示輻射區調整結果
+                document.getElementById('radiationAdjustedCost').classList.remove('hide');
+                document.getElementById('inspectionQuantityDisplay').textContent = inspectionQuantity;
+                document.getElementById('remainingQuantityDisplay').textContent = remainingQuantity;
+                document.getElementById('adjustedCostPerBottle').textContent = formatNumber(adjustedCostPerBottle) + ' 元';
+                
+                // 更新供後續計算使用的成本
+                window.calculatedCostPerBottle = adjustedCostPerBottle;
+            } else {
+                document.getElementById('radiationAdjustedCost').classList.add('hide');
+            }
+            
+            // 顯示總成本
+            document.getElementById('totalCost').textContent = `${formatNumber(totalCost)} 元 (${formatNumber(costPerBottle)} 元/瓶)`;
+            
+            // 顯示稅金計算結果
+            document.getElementById('taxResult').innerHTML = `
+                <table class="result-table">
+                    <tr>
+                        <th>項目</th>
+                        <th>金額 (TWD)</th>
+                        <th>計算公式</th>
+                    </tr>
+                    <tr>
+                        <td>購買成本</td>
+                        <td>${formatNumber(purchaseCost)}</td>
+                        <td>${formatNumber(price)} ${currency} × ${formatNumber(exchangeRate)} × ${quantity}瓶</td>
+                    </tr>
+                    <tr>
+                        <td>運費</td>
+                        <td>${formatNumber(shippingCost)}</td>
+                        <td>自訂金額</td>
+                    </tr>
+                    <tr>
+                        <td>酒稅</td>
+                        <td>${formatNumber(alcoholTax)}</td>
+                        <td>${alcoholTaxFormula} × ${formatNumber(volumeInLiters)}公升 × ${quantity}瓶</td>
+                    </tr>
+                    <tr>
+                        <td>關稅</td>
+                        <td>${formatNumber(tariff)}</td>
+                        <td>${formatNumber(importPrice)} × ${tariffRate}%</td>
+                    </tr>
+                    <tr>
+                        <td>推廣貿易服務費</td>
+                        <td>${formatNumber(tradeFee)}</td>
+                        <td>${formatNumber(importPrice)} × 0.04%</td>
+                    </tr>
+                    <tr>
+                        <td>營業稅</td>
+                        <td>${formatNumber(vat)}</td>
+                        <td>(${formatNumber(importPrice)} + ${formatNumber(alcoholTax)} + ${formatNumber(tariff)} + ${formatNumber(tradeFee)}) × 5%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>總稅金</strong></td>
+                        <td><strong>${formatNumber(totalTax)}</strong></td>
+                        <td>${formatNumber(alcoholTax)} + ${formatNumber(tariff)} + ${formatNumber(tradeFee)} + ${formatNumber(vat)}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>總成本</strong></td>
+                        <td><strong>${formatNumber(totalCost)}</strong></td>
+                        <td>${formatNumber(purchaseCost)} + ${formatNumber(shippingCost)} + ${formatNumber(totalTax)}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>單瓶成本</strong></td>
+                        <td><strong>${formatNumber(costPerBottle)}</strong></td>
+                        <td>${formatNumber(totalCost)} ÷ ${quantity}</td>
+                    </tr>
+                    ${isRadiationZone ? `
+                    <tr>
+                        <td><strong>輻射區調整後單瓶成本</strong></td>
+                        <td><strong class="savings">${formatNumber(adjustedCostPerBottle)}</strong></td>
+                        <td>${formatNumber(totalCost)} ÷ ${remainingQuantity} (扣除抽檢 ${inspectionQuantity} 瓶)</td>
+                    </tr>` : ''}
+                </table>
+            `;
+            
+            // 顯示計算說明
+            document.getElementById('calculationDetails').innerHTML = `
+                <p>稅金計算按以下順序進行：</p>
+                <ol>
+                    <li>購買成本 = 單價 × 匯率 × 數量</li>
+                    <li>關稅 = 購買成本 × 關稅率</li>
+                    <li>酒稅 = 每公升稅率 × 容量(公升) × 數量</li>
+                    <li>推廣貿易服務費 = 購買成本 × 0.04%</li>
+                    <li>營業稅 = (購買成本 + 酒稅 + 關稅 + 推廣貿易服務費) × 5%</li>
+                    <li>總稅金 = 關稅 + 酒稅 + 推廣貿易服務費 + 營業稅</li>
+                    <li>總成本 = 購買成本 + 運費 + 總稅金</li>
+                    <li>單瓶成本 = 總成本 ÷ 數量</li>
+                    ${isRadiationZone ? '<li>輻射區調整後單瓶成本 = 總成本 ÷ (總數量 - 抽檢數量)</li>' : ''}
+                </ol>
+            `;
+            
+            // 顯示結果區塊和計算詳情
+            document.getElementById('resultSection').classList.remove('hide');
+            // 重置零售價格計算的表單和結果
+            document.getElementById('sellingPrice').value = '';
+            document.getElementById('profitResult').classList.add('hide');
+            document.getElementById('priceResult').classList.add('hide');
+        } catch (error) {
+            console.error('計算稅金時發生錯誤:', error);
+            alert('計算過程中發生錯誤，請檢查輸入數據是否正確。');
+        }
+    }
+
+    // 計算毛利率
+    function calculateProfit() {
+        try {
+            const costPerBottle = window.calculatedCostPerBottle || 0;
+            const sellingPrice = parseFloat(document.getElementById('sellingPrice').value) || 0;
+            
+            if (costPerBottle <= 0 || sellingPrice <= 0) {
+                alert('請先計算稅金並輸入有效的售價');
+                return;
+            }
+            
+            // 計算利潤和毛利率
+            const profit = sellingPrice - costPerBottle;
+            const profitMargin = (profit / sellingPrice) * 100;
+            
+            // 顯示結果
+            document.getElementById('profitResult').innerHTML = `
+                <h3>毛利率計算結果</h3>
+                <table class="result-table">
+                    <tr>
+                        <td>單瓶成本</td>
+                        <td>${formatNumber(costPerBottle)} 元</td>
+                    </tr>
+                    <tr>
+                        <td>售價</td>
+                        <td>${formatNumber(sellingPrice)} 元</td>
+                    </tr>
+                    <tr>
+                        <td>單瓶利潤</td>
+                        <td>${formatNumber(profit)} 元</td>
+                    </tr>
+                    <tr>
+                        <td><strong>毛利率</strong></td>
+                        <td><strong>${formatNumber(profitMargin)}%</strong></td>
+                    </tr>
+                </table>
+            `;
+            
+            document.getElementById('profitResult').classList.remove('hide');
+            document.getElementById('priceResult').classList.add('hide');
+        } catch (error) {
+            console.error('計算毛利率時發生錯誤:', error);
+            alert('計算過程中發生錯誤，請檢查輸入數據是否正確。');
+        }
+    }
+
+    // 計算售價
+    function calculatePrice() {
+        try {
+            const costPerBottle = window.calculatedCostPerBottle || 0;
+            const targetProfit = parseFloat(document.getElementById('targetProfit').value) || 0;
+            
+            if (costPerBottle <= 0 || targetProfit <= 0 || targetProfit >= 100) {
+                alert('請先計算稅金並輸入有效的目標毛利率（1-99%）');
+                return;
+            }
+            
+            // 計算售價
+            // 毛利率 = (售價 - 成本) / 售價
+            // 因此 售價 = 成本 / (1 - 毛利率百分比)
+            const suggestedPrice = costPerBottle / (1 - (targetProfit / 100));
+            const profit = suggestedPrice - costPerBottle;
+            
+            // 計算不同毛利率的參考價格
+            const referencePrices = [];
+            const targetProfits = [10, 20, 30, 40, 50];
+            
+            for (const profit of targetProfits) {
+                if (profit !== targetProfit) { // 不重複計算目標毛利率
+                    const price = costPerBottle / (1 - (profit / 100));
+                    referencePrices.push({
+                        profit: profit,
+                        price: price
+                    });
+                }
+            }
+            
+            // 顯示結果
+            let resultHTML = `
+                <h3>建議售價計算結果</h3>
+                <table class="result-table">
+                    <tr>
+                        <td>單瓶成本</td>
+                        <td>${formatNumber(costPerBottle)} 元</td>
+                    </tr>
+                    <tr>
+                        <td>目標毛利率</td>
+                        <td>${formatNumber(targetProfit)}%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>建議售價</strong></td>
+                        <td><strong>${formatNumber(suggestedPrice)} 元</strong></td>
+                    </tr>
+                    <tr>
+                        <td>單瓶利潤</td>
+                        <td>${formatNumber(profit)} 元</td>
+                    </tr>
+                </table>
+                
+                <h3 style="margin-top: 15px;">其他毛利率參考價格</h3>
+                <table class="result-table">
+                    <tr>
+                        <th>毛利率</th>
+                        <th>建議售價</th>
+                        <th>單瓶利潤</th>
+                    </tr>
+            `;
+            
+            for (const ref of referencePrices) {
+                const refProfit = ref.price - costPerBottle;
+                resultHTML += `
+                    <tr>
+                        <td>${formatNumber(ref.profit)}%</td>
+                        <td>${formatNumber(ref.price)} 元</td>
+                        <td>${formatNumber(refProfit)} 元</td>
+                    </tr>
+                `;
+            }
+            
+            resultHTML += `</table>`;
+            
+            document.getElementById('priceResult').innerHTML = resultHTML;
+            document.getElementById('priceResult').classList.remove('hide');
+            document.getElementById('profitResult').classList.add('hide');
+        } catch (error) {
+            console.error('計算售價時發生錯誤:', error);
+            alert('計算過程中發生錯誤，請檢查輸入數據是否正確。');
+        }
+    }
+
+    // 頁面加載完成後執行
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            // 設定預設值
+            updateAlcoholTypeDefaults();
+            updateCurrencyDefaults();
+            updateTaxRateInfo(); // 確保初始稅率信息也顯示
+            
+            // 添加事件監聽器
+            document.getElementById('alcoholType').addEventListener('change', updateAlcoholTypeDefaults);
+            document.getElementById('currency').addEventListener('change', updateCurrencyDefaults);
+            document.getElementById('alcoholCategory').addEventListener('change', updateTaxRateInfo);
+            document.getElementById('alcoholPercentage').addEventListener('input', function() {
+                updateTaxRateInfo();
+                // 如果當前是利口酒，則更新關稅率
+                if (document.getElementById('alcoholType').value === 'liqueur') {
+                    const isDistilledBaseElement = document.getElementById('isDistilledBase');
+                    if (isDistilledBaseElement) {
+                        updateLiqueurTariff();
+                    }
+                }
+            });
+            document.getElementById('radiationZone').addEventListener('change', toggleRadiationOptions);
+            document.getElementById('calculateBtn').addEventListener('click', calculateTax);
+            document.getElementById('calculateProfitBtn').addEventListener('click', calculateProfit);
+            document.getElementById('calculatePriceBtn').addEventListener('click', calculatePrice);
+            
+            // 添加計算詳情切換按鈕的事件處理
+            // 注意：這裡不需要立即綁定，因為該元素在點擊「計算稅金」後才會出現
+            
+            // 切換定價選項
+            document.querySelectorAll('input[name="pricingOption"]').forEach(function(radio) {
+                radio.addEventListener('change', function() {
+                    document.getElementById('calcProfitTab').classList.toggle('active', this.value === 'calcProfit');
+                    document.getElementById('calcProfitTab').classList.toggle('hide', this.value !== 'calcProfit');
+                    document.getElementById('calcPriceTab').classList.toggle('active', this.value === 'calcPrice');
+                    document.getElementById('calcPriceTab').classList.toggle('hide', this.value !== 'calcPrice');
+                });
+            });
+        } catch (error) {
+            console.error('初始化時發生錯誤:', error);
+        }
+    });
+    </script>
+</body>
+</html>

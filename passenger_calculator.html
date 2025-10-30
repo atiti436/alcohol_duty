@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酒類進口稅金計算機 - 旅客版</title>
+    <style>
+        :root {
+            --text-color: #333;
+            --bg-color: #f5f5f5;
+            --card-bg: #fff;
+            --border-color: #ddd;
+            --primary-color: #4a6fa5;
+            --accent-color: #28a745;
+            --error-color: #dc3545;
+            --info-color: #17a2b8;
+            --warning-color: #ffc107;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-size: 14px;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+
+        .col {
+            flex: 1;
+            padding: 0 10px;
+            min-width: 200px;
+        }
+
+        .col-full {
+            flex: 100%;
+            padding: 0 10px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-success {
+            background-color: var(--accent-color);
+        }
+
+        .btn-danger {
+            background-color: var(--error-color);
+            width: auto;
+            padding: 8px 15px;
+            font-size: 14px;
+            margin-top: 0;
+        }
+
+        .btn-add {
+            background-color: var(--accent-color);
+            font-size: 18px;
+            padding: 12px;
+        }
+
+        /* 免稅額顯示 */
+        .duty-free-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .duty-free-info h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .duty-free-bar {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            height: 30px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .duty-free-bar-fill {
+            background-color: var(--accent-color);
+            height: 100%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .duty-free-text {
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* 酒品卡片 */
+        .bottle-card {
+            background-color: #f8f9fa;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .bottle-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .bottle-card-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .use-duty-free {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: rgba(102, 126, 234, 0.1);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+        }
+
+        .use-duty-free input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        .use-duty-free label {
+            margin-bottom: 0;
+            font-weight: normal;
+            display: inline;
+        }
+
+        .duty-free-usage {
+            margin-left: auto;
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .tax-info {
+            background-color: rgba(74, 111, 165, 0.1);
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 8px;
+            font-size: 13px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .liqueur-options {
+            background-color: #fff3cd;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .liqueur-options label {
+            font-weight: normal;
+            margin-bottom: 8px;
+        }
+
+        .liqueur-options input[type="radio"] {
+            width: auto;
+            margin-right: 5px;
+        }
+
+        .radio-group {
+            margin-top: 8px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .radio-option label {
+            margin-bottom: 0;
+            margin-left: 5px;
+        }
+
+        .other-category-select {
+            margin-top: 10px;
+            background-color: #fff3cd;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid var(--warning-color);
+        }
+
+        /* 結果顯示 */
+        .result {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .result-table th, .result-table td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        .result-table th {
+            background-color: rgba(74, 111, 165, 0.1);
+            font-weight: bold;
+        }
+
+        .highlight {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .calculation-details {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #6c757d;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .savings {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .add-bottle-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .col {
+                flex: 100%;
+                margin-bottom: 10px;
+            }
+
+            body {
+                padding: 10px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .bottle-card {
+                padding: 12px;
+            }
+
+            .bottle-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .btn-danger {
+                margin-top: 10px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>酒類進口稅金計算機 - 旅客版</h1>
+            <p class="subtitle">計算旅客攜帶酒類入境的稅金成本（含免稅額計算）</p>
+        </header>
+
+        <!-- 基本設定 -->
+        <div class="card">
+            <h2>基本設定</h2>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="passengerCount">入境人數</label>
+                        <input type="number" id="passengerCount" min="1" step="1" value="1">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="currency">外幣</label>
+                        <select id="currency">
+                            <option value="JPY">日幣 (JPY)</option>
+                            <option value="USD">美元 (USD)</option>
+                            <option value="EUR">歐元 (EUR)</option>
+                            <option value="GBP">英鎊 (GBP)</option>
+                            <option value="CNY">人民幣 (CNY)</option>
+                            <option value="TWD">新台幣 (TWD)</option>
+                            <option value="OTHER">其他貨幣</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="exchangeRate">匯率 (兌換新台幣)</label>
+                        <input type="number" id="exchangeRate" min="0" step="0.0001" value="0.22">
+                    </div>
+                </div>
+            </div>
+
+            <div class="duty-free-info">
+                <h3>免稅額度</h3>
+                <div class="duty-free-bar">
+                    <div class="duty-free-bar-fill" id="dutyFreeBar" style="width: 0%">0%</div>
+                </div>
+                <div class="duty-free-text">
+                    <span>總額度: <strong id="totalDutyFree">1.5</strong> 公升</span>
+                    <span>已使用: <strong id="usedDutyFree">0</strong> 公升</span>
+                    <span>剩餘: <strong id="remainingDutyFree">1.5</strong> 公升</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 酒品清單 -->
+        <div class="card">
+            <h2>酒品清單</h2>
+            <div id="bottleList">
+                <!-- 酒品卡片將動態插入這裡 -->
+            </div>
+
+            <div class="add-bottle-container">
+                <button type="button" class="btn-add" id="addBottleBtn">+ 新增酒品</button>
+            </div>
+
+            <button type="button" id="calculateBtn">計算稅金</button>
+        </div>
+
+        <!-- 結果區塊 -->
+        <div id="resultSection" class="card hide">
+            <h2>計算結果</h2>
+
+            <div class="highlight">
+                <h3>總成本</h3>
+                <div id="totalCost" class="savings"></div>
+            </div>
+
+            <div id="taxResult"></div>
+
+            <div class="calculation-details">
+                <h3 onclick="toggleCalculationDetails()" style="cursor: pointer;">
+                    稅金計算說明 <span id="detailsToggle">[展開]</span>
+                </h3>
+                <div id="calculationDetails" class="hide"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局變量
+        let bottleCount = 0;
+
+        // 格式化數字
+        function formatNumber(num) {
+            if (num === undefined || num === null) {
+                return "0";
+            }
+            const roundedNum = Math.round(num);
+            return roundedNum.toLocaleString('zh-TW');
+        }
+
+        // 計算免稅額
+        function calculateTotalDutyFree() {
+            const passengerCount = parseInt(document.getElementById('passengerCount').value) || 1;
+            return passengerCount * 1.5;
+        }
+
+        // 更新免稅額顯示
+        function updateDutyFreeDisplay() {
+            const totalDutyFree = calculateTotalDutyFree();
+            let usedDutyFree = 0;
+
+            // 計算已使用的免稅額
+            document.querySelectorAll('.bottle-card').forEach(card => {
+                const checkbox = card.querySelector('.use-duty-free-checkbox');
+                if (checkbox && checkbox.checked) {
+                    const volume = parseFloat(card.querySelector('.volume-input').value) || 0;
+                    usedDutyFree += volume / 1000; // 轉換為公升
+                }
+            });
+
+            const remainingDutyFree = Math.max(0, totalDutyFree - usedDutyFree);
+            const percentage = Math.min(100, (usedDutyFree / totalDutyFree) * 100);
+
+            document.getElementById('totalDutyFree').textContent = totalDutyFree.toFixed(1);
+            document.getElementById('usedDutyFree').textContent = usedDutyFree.toFixed(2);
+            document.getElementById('remainingDutyFree').textContent = remainingDutyFree.toFixed(2);
+
+            const barFill = document.getElementById('dutyFreeBar');
+            barFill.style.width = percentage.toFixed(1) + '%';
+            barFill.textContent = percentage.toFixed(1) + '%';
+
+            // 更新每個酒品的免稅額使用顯示
+            document.querySelectorAll('.bottle-card').forEach(card => {
+                const checkbox = card.querySelector('.use-duty-free-checkbox');
+                const usageSpan = card.querySelector('.duty-free-usage');
+                if (checkbox && checkbox.checked && usageSpan) {
+                    const volume = parseFloat(card.querySelector('.volume-input').value) || 0;
+                    usageSpan.textContent = `佔用 ${(volume / 1000).toFixed(2)}L`;
+                } else if (usageSpan) {
+                    usageSpan.textContent = '';
+                }
+            });
+        }
+
+        // 更新貨幣匯率預設值
+        function updateCurrencyDefaults() {
+            const currency = document.getElementById('currency').value;
+            const exchangeRateInput = document.getElementById('exchangeRate');
+
+            switch(currency) {
+                case 'JPY':
+                    exchangeRateInput.value = '0.22';
+                    break;
+                case 'USD':
+                    exchangeRateInput.value = '31.5';
+                    break;
+                case 'EUR':
+                    exchangeRateInput.value = '34.2';
+                    break;
+                case 'GBP':
+                    exchangeRateInput.value = '40.5';
+                    break;
+                case 'CNY':
+                    exchangeRateInput.value = '4.35';
+                    break;
+                case 'TWD':
+                    exchangeRateInput.value = '1';
+                    break;
+                default:
+                    exchangeRateInput.value = '';
+            }
+        }
+
+        // 獲取酒類分類的稅率信息
+        function getTaxRateInfo(category, alcoholPercentage) {
+            let taxRateText = '';
+            switch(category) {
+                case 'fermented-beer':
+                    taxRateText = '酒稅: 26元/公升';
+                    break;
+                case 'fermented-other':
+                    taxRateText = `酒稅: ${alcoholPercentage}度 × 7元/度 = ${(alcoholPercentage * 7).toFixed(2)}元/公升`;
+                    break;
+                case 'distilled':
+                    taxRateText = `酒稅: ${alcoholPercentage}度 × 2.5元/度 = ${(alcoholPercentage * 2.5).toFixed(2)}元/公升`;
+                    break;
+                case 'remanufactured-high':
+                    taxRateText = '酒稅: 185元/公升 (酒精>20%)';
+                    break;
+                case 'remanufactured-low':
+                    taxRateText = `酒稅: ${alcoholPercentage}度 × 7元/度 = ${(alcoholPercentage * 7).toFixed(2)}元/公升 (酒精≤20%)`;
+                    break;
+                case 'cooking':
+                    taxRateText = '酒稅: 9元/公升';
+                    break;
+                case 'other':
+                    taxRateText = `酒稅: ${alcoholPercentage}度 × 7元/度 = ${(alcoholPercentage * 7).toFixed(2)}元/公升`;
+                    break;
+                case 'alcohol':
+                    taxRateText = '酒稅: 15元/公升';
+                    break;
+            }
+            return taxRateText;
+        }
+
+        // 更新酒品的稅率信息顯示
+        function updateBottleTaxInfo(bottleCard) {
+            const alcoholType = bottleCard.querySelector('.alcohol-type-select').value;
+            const alcoholPercentage = parseFloat(bottleCard.querySelector('.alcohol-percentage-input').value) || 0;
+            const taxInfoDiv = bottleCard.querySelector('.tax-info');
+
+            let category = '';
+            let tariffRate = 0;
+            let tariffText = '';
+
+            // 根據酒類自動設定分類和關稅
+            switch(alcoholType) {
+                case 'whisky':
+                    category = 'distilled';
+                    tariffRate = 0;
+                    tariffText = '關稅: 0%';
+                    break;
+                case 'wine':
+                    category = 'fermented-other';
+                    tariffRate = 10;
+                    tariffText = '關稅: 10%';
+                    break;
+                case 'beer':
+                    category = 'fermented-beer';
+                    tariffRate = 0;
+                    tariffText = '關稅: 0%';
+                    break;
+                case 'sake':
+                    category = 'fermented-other';
+                    tariffRate = 20;
+                    tariffText = '關稅: 20%';
+                    break;
+                case 'vodka':
+                case 'rum':
+                case 'gin':
+                    category = 'distilled';
+                    tariffRate = 20;
+                    tariffText = '關稅: 20%';
+                    break;
+                case 'brandy':
+                    category = 'distilled';
+                    tariffRate = 0;
+                    tariffText = '關稅: 0%';
+                    break;
+                case 'liqueur':
+                    // 利口酒需要特殊處理
+                    handleLiqueurType(bottleCard);
+                    return;
+                case 'other':
+                    // 其他酒類需要顯示下拉選單
+                    handleOtherType(bottleCard);
+                    return;
+            }
+
+            // 儲存分類到隱藏欄位
+            let categoryInput = bottleCard.querySelector('.category-hidden');
+            if (!categoryInput) {
+                categoryInput = document.createElement('input');
+                categoryInput.type = 'hidden';
+                categoryInput.className = 'category-hidden';
+                bottleCard.appendChild(categoryInput);
+            }
+            categoryInput.value = category;
+
+            // 設定關稅率
+            bottleCard.querySelector('.tariff-rate-input').value = tariffRate;
+
+            // 移除利口酒和其他類別的特殊區塊
+            const liqueurOptions = bottleCard.querySelector('.liqueur-options');
+            if (liqueurOptions) liqueurOptions.remove();
+            const otherOptions = bottleCard.querySelector('.other-category-select');
+            if (otherOptions) otherOptions.remove();
+
+            // 顯示稅率信息
+            const taxRateText = getTaxRateInfo(category, alcoholPercentage);
+            taxInfoDiv.innerHTML = `💡 <strong>${taxRateText}</strong><br>💡 <strong>${tariffText}</strong>`;
+        }
+
+        // 處理利口酒類型
+        function handleLiqueurType(bottleCard) {
+            const alcoholPercentage = parseFloat(bottleCard.querySelector('.alcohol-percentage-input').value) || 20;
+
+            // 移除其他類別選單
+            const otherOptions = bottleCard.querySelector('.other-category-select');
+            if (otherOptions) otherOptions.remove();
+
+            // 檢查是否已有利口酒選項
+            let liqueurOptions = bottleCard.querySelector('.liqueur-options');
+            if (!liqueurOptions) {
+                liqueurOptions = document.createElement('div');
+                liqueurOptions.className = 'liqueur-options';
+                liqueurOptions.innerHTML = `
+                    <label><strong>⚙️ 基酒類型</strong></label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" name="baseType_${bottleCard.dataset.bottleId}" value="distilled" checked>
+                            <label>蒸餾酒/酒精基酒</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="baseType_${bottleCard.dataset.bottleId}" value="other">
+                            <label>其他基酒</label>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                        💡 酒精>15%且蒸餾酒基酒: 0%<br>
+                        💡 酒精>20%但非蒸餾酒基酒: 40%<br>
+                        💡 其他: 20%
+                    </div>
+                `;
+                bottleCard.querySelector('.tax-info').after(liqueurOptions);
+
+                // 添加事件監聽
+                liqueurOptions.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.addEventListener('change', () => updateLiqueurTariff(bottleCard));
+                });
+            }
+
+            updateLiqueurTariff(bottleCard);
+        }
+
+        // 更新利口酒關稅
+        function updateLiqueurTariff(bottleCard) {
+            const alcoholPercentage = parseFloat(bottleCard.querySelector('.alcohol-percentage-input').value) || 0;
+            const isDistilledBase = bottleCard.querySelector(`input[name="baseType_${bottleCard.dataset.bottleId}"]:checked`)?.value === 'distilled';
+
+            let tariffRate, category, tariffExplanation;
+
+            if (alcoholPercentage > 15 && isDistilledBase) {
+                tariffRate = 0;
+                tariffExplanation = '(>15%酒精且蒸餾酒基酒)';
+            } else if (alcoholPercentage > 20) {
+                tariffRate = 40;
+                tariffExplanation = '(>20%酒精但非蒸餾酒基酒)';
+            } else {
+                tariffRate = 20;
+                tariffExplanation = '(其他情況)';
+            }
+
+            // 設定分類
+            if (alcoholPercentage > 20) {
+                category = 'remanufactured-high';
+            } else {
+                category = 'remanufactured-low';
+            }
+
+            // 儲存分類
+            let categoryInput = bottleCard.querySelector('.category-hidden');
+            if (!categoryInput) {
+                categoryInput = document.createElement('input');
+                categoryInput.type = 'hidden';
+                categoryInput.className = 'category-hidden';
+                bottleCard.appendChild(categoryInput);
+            }
+            categoryInput.value = category;
+
+            // 設定關稅率
+            bottleCard.querySelector('.tariff-rate-input').value = tariffRate;
+
+            // 更新顯示
+            const taxRateText = getTaxRateInfo(category, alcoholPercentage);
+            bottleCard.querySelector('.tax-info').innerHTML = `
+                💡 <strong>${taxRateText}</strong><br>
+                💡 <strong>關稅: ${tariffRate}% ${tariffExplanation}</strong>
+            `;
+        }
+
+        // 處理其他酒類
+        function handleOtherType(bottleCard) {
+            const alcoholPercentage = parseFloat(bottleCard.querySelector('.alcohol-percentage-input').value) || 0;
+
+            // 移除利口酒選項
+            const liqueurOptions = bottleCard.querySelector('.liqueur-options');
+            if (liqueurOptions) liqueurOptions.remove();
+
+            // 檢查是否已有其他類別選單
+            let otherOptions = bottleCard.querySelector('.other-category-select');
+            if (!otherOptions) {
+                otherOptions = document.createElement('div');
+                otherOptions.className = 'other-category-select';
+                otherOptions.innerHTML = `
+                    <label><strong>⚙️ 請選擇酒類分類</strong></label>
+                    <select class="other-category-dropdown">
+                        <option value="fermented-beer">釀造酒類 - 啤酒</option>
+                        <option value="fermented-other">釀造酒類 - 其他釀造酒</option>
+                        <option value="distilled">蒸餾酒類</option>
+                        <option value="remanufactured-high">再製酒類 - 酒精成分超過20%</option>
+                        <option value="remanufactured-low">再製酒類 - 酒精成分20%以下</option>
+                        <option value="cooking">料理酒</option>
+                        <option value="other">其他酒類</option>
+                        <option value="alcohol">酒精</option>
+                    </select>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label>關稅率 (%)</label>
+                        <input type="number" class="other-tariff-input" min="0" max="100" step="0.1" value="0">
+                    </div>
+                `;
+                bottleCard.querySelector('.tax-info').after(otherOptions);
+
+                // 添加事件監聽
+                const dropdown = otherOptions.querySelector('.other-category-dropdown');
+                dropdown.addEventListener('change', () => updateOtherCategory(bottleCard));
+
+                const tariffInput = otherOptions.querySelector('.other-tariff-input');
+                tariffInput.addEventListener('input', () => {
+                    bottleCard.querySelector('.tariff-rate-input').value = tariffInput.value;
+                });
+            }
+
+            updateOtherCategory(bottleCard);
+        }
+
+        // 更新其他類別的信息
+        function updateOtherCategory(bottleCard) {
+            const dropdown = bottleCard.querySelector('.other-category-dropdown');
+            const category = dropdown.value;
+            const alcoholPercentage = parseFloat(bottleCard.querySelector('.alcohol-percentage-input').value) || 0;
+            const tariffInput = bottleCard.querySelector('.other-tariff-input');
+
+            // 儲存分類
+            let categoryInput = bottleCard.querySelector('.category-hidden');
+            if (!categoryInput) {
+                categoryInput = document.createElement('input');
+                categoryInput.type = 'hidden';
+                categoryInput.className = 'category-hidden';
+                bottleCard.appendChild(categoryInput);
+            }
+            categoryInput.value = category;
+
+            // 同步關稅率
+            bottleCard.querySelector('.tariff-rate-input').value = tariffInput.value;
+
+            // 更新顯示
+            const taxRateText = getTaxRateInfo(category, alcoholPercentage);
+            bottleCard.querySelector('.tax-info').innerHTML = `💡 <strong>${taxRateText}</strong>`;
+        }
+
+        // 新增酒品卡片
+        function addBottle() {
+            bottleCount++;
+            const bottleId = `bottle_${bottleCount}`;
+
+            const bottleCard = document.createElement('div');
+            bottleCard.className = 'bottle-card';
+            bottleCard.dataset.bottleId = bottleId;
+
+            bottleCard.innerHTML = `
+                <div class="bottle-card-header">
+                    <div class="bottle-card-title">酒品 ${bottleCount}</div>
+                    <button type="button" class="btn-danger delete-bottle-btn">刪除</button>
+                </div>
+
+                <div class="use-duty-free">
+                    <input type="checkbox" class="use-duty-free-checkbox" id="useDutyFree_${bottleId}">
+                    <label for="useDutyFree_${bottleId}">使用免稅額</label>
+                    <span class="duty-free-usage"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>酒類種類</label>
+                    <select class="alcohol-type-select">
+                        <option value="whisky">威士忌</option>
+                        <option value="wine">葡萄酒</option>
+                        <option value="beer">啤酒</option>
+                        <option value="sake">清酒</option>
+                        <option value="vodka">伏特加</option>
+                        <option value="rum">蘭姆酒</option>
+                        <option value="gin">琴酒</option>
+                        <option value="liqueur">利口酒</option>
+                        <option value="brandy">白蘭地</option>
+                        <option value="other">其他</option>
+                    </select>
+                </div>
+
+                <div class="tax-info"></div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label>酒精度數 (%)</label>
+                            <input type="number" class="alcohol-percentage-input" min="0" max="100" step="0.1" value="40">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label>容量 (ml)</label>
+                            <input type="number" class="volume-input" min="0" step="1" value="700">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label>單價 (外幣/瓶)</label>
+                            <input type="number" class="price-input" min="0" step="0.01" placeholder="例：5000">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label>數量 (瓶)</label>
+                            <input type="number" class="quantity-input" min="1" step="1" value="1">
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" class="tariff-rate-input" value="0">
+            `;
+
+            document.getElementById('bottleList').appendChild(bottleCard);
+
+            // 添加事件監聽
+            const alcoholTypeSelect = bottleCard.querySelector('.alcohol-type-select');
+            alcoholTypeSelect.addEventListener('change', () => {
+                updateBottleTaxInfo(bottleCard);
+            });
+
+            const alcoholPercentageInput = bottleCard.querySelector('.alcohol-percentage-input');
+            alcoholPercentageInput.addEventListener('input', () => {
+                updateBottleTaxInfo(bottleCard);
+            });
+
+            const volumeInput = bottleCard.querySelector('.volume-input');
+            volumeInput.addEventListener('input', () => {
+                updateDutyFreeDisplay();
+            });
+
+            const dutyFreeCheckbox = bottleCard.querySelector('.use-duty-free-checkbox');
+            dutyFreeCheckbox.addEventListener('change', () => {
+                updateDutyFreeDisplay();
+            });
+
+            const deleteBtn = bottleCard.querySelector('.delete-bottle-btn');
+            deleteBtn.addEventListener('click', () => {
+                bottleCard.remove();
+                updateDutyFreeDisplay();
+                renumberBottles();
+            });
+
+            // 初始化稅率信息
+            updateBottleTaxInfo(bottleCard);
+        }
+
+        // 重新編號酒品
+        function renumberBottles() {
+            const bottles = document.querySelectorAll('.bottle-card');
+            bottles.forEach((bottle, index) => {
+                bottle.querySelector('.bottle-card-title').textContent = `酒品 ${index + 1}`;
+            });
+        }
+
+        // 切換計算詳情
+        function toggleCalculationDetails() {
+            const details = document.getElementById('calculationDetails');
+            const toggle = document.getElementById('detailsToggle');
+            const isHidden = details.classList.contains('hide');
+
+            details.classList.toggle('hide', !isHidden);
+            toggle.textContent = isHidden ? '[收合]' : '[展開]';
+        }
+
+        // 計算稅金
+        function calculateTax() {
+            try {
+                const bottles = document.querySelectorAll('.bottle-card');
+                if (bottles.length === 0) {
+                    alert('請至少新增一個酒品');
+                    return;
+                }
+
+                const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 0;
+                const currency = document.getElementById('currency').value;
+
+                if (exchangeRate <= 0) {
+                    alert('請輸入有效的匯率');
+                    return;
+                }
+
+                // 收集所有酒品資料
+                const bottleData = [];
+                let hasError = false;
+
+                bottles.forEach((bottle, index) => {
+                    const alcoholPercentage = parseFloat(bottle.querySelector('.alcohol-percentage-input').value) || 0;
+                    const volume = parseFloat(bottle.querySelector('.volume-input').value) || 0;
+                    const price = parseFloat(bottle.querySelector('.price-input').value) || 0;
+                    const quantity = parseInt(bottle.querySelector('.quantity-input').value) || 1;
+                    const tariffRate = parseFloat(bottle.querySelector('.tariff-rate-input').value) || 0;
+                    const useDutyFree = bottle.querySelector('.use-duty-free-checkbox').checked;
+                    const alcoholType = bottle.querySelector('.alcohol-type-select').value;
+                    const categoryInput = bottle.querySelector('.category-hidden');
+                    const category = categoryInput ? categoryInput.value : 'other';
+
+                    if (alcoholPercentage <= 0 || volume <= 0 || price <= 0) {
+                        alert(`酒品 ${index + 1} 的資料不完整（度數、容量和單價必填）`);
+                        hasError = true;
+                        return;
+                    }
+
+                    bottleData.push({
+                        index: index + 1,
+                        alcoholType,
+                        category,
+                        alcoholPercentage,
+                        volume,
+                        price,
+                        quantity,
+                        tariffRate,
+                        useDutyFree
+                    });
+                });
+
+                if (hasError) return;
+
+                // 處理免稅額分配
+                const totalDutyFree = calculateTotalDutyFree();
+                let remainingDutyFree = totalDutyFree;
+
+                // 計算每個酒品的稅金
+                let totalPurchaseCost = 0;
+                let totalAlcoholTax = 0;
+                let totalTariff = 0;
+                let totalTradeFee = 0;
+                let totalVAT = 0;
+                let bottleResults = [];
+
+                bottleData.forEach(bottle => {
+                    const volumeInLiters = bottle.volume / 1000;
+                    const purchaseCost = bottle.price * exchangeRate * bottle.quantity;
+
+                    // 計算酒稅（每公升）
+                    let alcoholTaxPerLiter = 0;
+                    switch (bottle.category) {
+                        case 'fermented-beer':
+                            alcoholTaxPerLiter = 26;
+                            break;
+                        case 'fermented-other':
+                            alcoholTaxPerLiter = 7 * bottle.alcoholPercentage;
+                            break;
+                        case 'distilled':
+                            alcoholTaxPerLiter = 2.5 * bottle.alcoholPercentage;
+                            break;
+                        case 'remanufactured-high':
+                            alcoholTaxPerLiter = 185;
+                            break;
+                        case 'remanufactured-low':
+                            alcoholTaxPerLiter = 7 * bottle.alcoholPercentage;
+                            break;
+                        case 'cooking':
+                            alcoholTaxPerLiter = 9;
+                            break;
+                        case 'other':
+                            alcoholTaxPerLiter = 7 * bottle.alcoholPercentage;
+                            break;
+                        case 'alcohol':
+                            alcoholTaxPerLiter = 15;
+                            break;
+                    }
+
+                    // 處理免稅額
+                    let dutyFreeVolume = 0;
+                    let taxableVolume = volumeInLiters * bottle.quantity;
+
+                    if (bottle.useDutyFree && remainingDutyFree > 0) {
+                        dutyFreeVolume = Math.min(taxableVolume, remainingDutyFree);
+                        taxableVolume -= dutyFreeVolume;
+                        remainingDutyFree -= dutyFreeVolume;
+                    }
+
+                    // 計算酒稅（只對超過免稅額的部分課稅）
+                    const alcoholTax = alcoholTaxPerLiter * taxableVolume;
+                    const tariff = purchaseCost * (bottle.tariffRate / 100);
+                    const tradeFee = purchaseCost * 0.0004;
+                    const subtotalForVAT = purchaseCost + alcoholTax + tariff + tradeFee;
+                    const vat = subtotalForVAT * 0.05;
+
+                    totalPurchaseCost += purchaseCost;
+                    totalAlcoholTax += alcoholTax;
+                    totalTariff += tariff;
+                    totalTradeFee += tradeFee;
+                    totalVAT += vat;
+
+                    bottleResults.push({
+                        ...bottle,
+                        purchaseCost,
+                        alcoholTaxPerLiter,
+                        dutyFreeVolume,
+                        taxableVolume,
+                        alcoholTax,
+                        tariff,
+                        tradeFee,
+                        vat,
+                        totalCost: purchaseCost + alcoholTax + tariff + tradeFee + vat,
+                        volumeInLiters
+                    });
+                });
+
+                const totalTax = totalAlcoholTax + totalTariff + totalTradeFee + totalVAT;
+                const grandTotal = totalPurchaseCost + totalTax;
+
+                // 顯示結果
+                document.getElementById('totalCost').innerHTML = `
+                    <h3 style="font-size: 24px; margin-bottom: 10px;">${formatNumber(grandTotal)} 元</h3>
+                    <p>購買成本: ${formatNumber(totalPurchaseCost)} 元 + 總稅金: ${formatNumber(totalTax)} 元</p>
+                `;
+
+                // 顯示詳細計算表格
+                let resultHTML = '<h3>酒品明細</h3><table class="result-table"><tr><th>酒品</th><th>購買成本</th><th>免稅額</th><th>酒稅</th><th>關稅</th><th>推廣費</th><th>營業稅</th><th>小計</th></tr>';
+
+                bottleResults.forEach(bottle => {
+                    const bottleTypeName = document.querySelector(`option[value="${bottle.alcoholType}"]`).textContent;
+                    resultHTML += `
+                        <tr>
+                            <td>${bottleTypeName} x${bottle.quantity}</td>
+                            <td>${formatNumber(bottle.purchaseCost)}</td>
+                            <td>${bottle.dutyFreeVolume > 0 ? bottle.dutyFreeVolume.toFixed(2) + 'L' : '-'}</td>
+                            <td>${formatNumber(bottle.alcoholTax)}</td>
+                            <td>${formatNumber(bottle.tariff)}</td>
+                            <td>${formatNumber(bottle.tradeFee)}</td>
+                            <td>${formatNumber(bottle.vat)}</td>
+                            <td><strong>${formatNumber(bottle.totalCost)}</strong></td>
+                        </tr>
+                    `;
+                });
+
+                resultHTML += `
+                    <tr style="background-color: rgba(74, 111, 165, 0.1); font-weight: bold;">
+                        <td>總計</td>
+                        <td>${formatNumber(totalPurchaseCost)}</td>
+                        <td>${(totalDutyFree - remainingDutyFree).toFixed(2)}L</td>
+                        <td>${formatNumber(totalAlcoholTax)}</td>
+                        <td>${formatNumber(totalTariff)}</td>
+                        <td>${formatNumber(totalTradeFee)}</td>
+                        <td>${formatNumber(totalVAT)}</td>
+                        <td><strong>${formatNumber(grandTotal)}</strong></td>
+                    </tr>
+                </table>`;
+
+                document.getElementById('taxResult').innerHTML = resultHTML;
+
+                // 顯示計算說明
+                let detailsHTML = '<p><strong>稅金計算說明：</strong></p><ol>';
+                detailsHTML += '<li>購買成本 = 單價 × 匯率 × 數量</li>';
+                detailsHTML += '<li>免稅額 = 入境人數 × 1.5公升（勾選「使用免稅額」的酒品優先扣除）</li>';
+                detailsHTML += '<li>酒稅 = 每公升稅率 × 容量(公升) - 免稅額對應的酒稅</li>';
+                detailsHTML += '<li>關稅 = 購買成本 × 關稅率</li>';
+                detailsHTML += '<li>推廣貿易服務費 = 購買成本 × 0.04%</li>';
+                detailsHTML += '<li>營業稅 = (購買成本 + 酒稅 + 關稅 + 推廣費) × 5%</li>';
+                detailsHTML += '<li>總成本 = 購買成本 + 酒稅 + 關稅 + 推廣費 + 營業稅</li>';
+                detailsHTML += '</ol>';
+
+                document.getElementById('calculationDetails').innerHTML = detailsHTML;
+
+                // 顯示結果區域
+                document.getElementById('resultSection').classList.remove('hide');
+
+            } catch (error) {
+                console.error('計算錯誤:', error);
+                alert('計算過程中發生錯誤，請檢查輸入資料');
+            }
+        }
+
+        // 頁面加載完成後執行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化
+            updateCurrencyDefaults();
+            updateDutyFreeDisplay();
+
+            // 添加第一個酒品
+            addBottle();
+
+            // 事件監聽
+            document.getElementById('currency').addEventListener('change', updateCurrencyDefaults);
+            document.getElementById('passengerCount').addEventListener('input', updateDutyFreeDisplay);
+            document.getElementById('addBottleBtn').addEventListener('click', addBottle);
+            document.getElementById('calculateBtn').addEventListener('click', calculateTax);
+        });
+    </script>
+</body>
+</html>
